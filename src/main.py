@@ -8,9 +8,10 @@ def main():
 
     automacao.acessar_portal()
     automacao.realizar_login()
+    automacao.acessar_atender_pedido()
+    automacao.capturar_dados_pedido()
 
     input("Pressione ENTER para encerrar...")
-
     driver.quit()
 
 
