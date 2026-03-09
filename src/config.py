@@ -7,7 +7,7 @@ load_dotenv()
 class Config:
 
     # -------------------------
-    # PORTO (MANTIDO)
+    # PORTO 
     # -------------------------
     PORTO_URL = os.getenv("PORTO_URL")
     PORTO_USER = os.getenv("PORTO_USER")
@@ -15,30 +15,30 @@ class Config:
     HEADLESS = os.getenv("HEADLESS", "False").lower() == "true"
 
     # -------------------------
-    # LISTA DE CPFs PARA MONITORAMENTO
+    # LISTA DE CPFs 
     # -------------------------
     CNPJS = [
-        {"usuario": "13510527054", "senha": "vendas10"},
-        {"usuario": "04527072005", "senha": "vendas10"},
-        {"usuario": "31466498021", "senha": "vendas10"},
-        {"usuario": "45619945057", "senha": "vendas10"},
-        {"usuario": "26408028012", "senha": "vendas10"},
-        {"usuario": "51983079049", "senha": "vendas10"},
-        {"usuario": "26572696057", "senha": "batata14"},
-        {"usuario": "82366330049", "senha": "vendas20"},
-        {"usuario": "82489673017", "senha": "vendas20"},
-        {"usuario": "56022821061", "senha": "vendas20"},
-        {"usuario": "45650126003", "senha": "vendas20"},
-        {"usuario": "57474628066", "senha": "vendas20"},
-        {"usuario": "69922686007", "senha": "vendas20"},
-        {"usuario": "83296553002", "senha": "vendas20"},
+        {"usuario": "13510527054", "senha": "vendas10"}, #ok
+        {"usuario": "04527072005", "senha": "vendas30"}, #login invalido
+        {"usuario": "31466498021", "senha": "vendas10"}, #ok
+        {"usuario": "45619945057", "senha": "vendas10"}, #ok
+        {"usuario": "python -m pip install oracledb", "senha": "vendas10"}, #ok
+        {"usuario": "51983079049", "senha": "vendas10"}, #ok
+        {"usuario": "26572696057", "senha": "vendas10"}, #ok
+        {"usuario": "82366330049", "senha": "vendas10"}, #ok
+        {"usuario": "82489673017", "senha": "vendas10"}, #ok
+        {"usuario": "56022821061", "senha": "vendas10"}, #ok
+        {"usuario": "45650126003", "senha": "vendas10"}, #ok
+        {"usuario": "57474628066", "senha": "vendas10"}, #ok
+        {"usuario": "69922686007", "senha": "vendas10"}, #ok
+        {"usuario": "83296553002", "senha": "vendas10"}, #ok
     ]
 
     # Tempo de espera entre cada ciclo completo (em segundos)
     TEMPO_ESPERA = 300  # 5 minutos
 
     # -------------------------
-    # EMAIL (MANTIDO)
+    # EMAIL 
     # -------------------------
     EMAIL_REMETENTE = os.getenv("EMAIL_REMETENTE")
     EMAIL_SENHA = os.getenv("EMAIL_SENHA")
