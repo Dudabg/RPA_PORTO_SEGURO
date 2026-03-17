@@ -1,14 +1,14 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from config import Config
+import config
 import os
 
 
 def criar_navegador():
     options = Options()
 
-    if Config.HEADLESS:
+    if config.Config.HEADLESS:
         options.add_argument("--headless=new")
 
     options.add_argument("--start-maximized")

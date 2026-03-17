@@ -18,10 +18,20 @@ class NotificadorEmail:
             else:
                 destinatarios = destinatario
 
+            # ===== PERMITE REPOSIÇÃO — cor e texto =====
+            permite_reposicao = dados.get('permite_reposicao')
+
+            if permite_reposicao == "Não":
+                reposicao_html = '<span style="color:red;"><b>Não</b></span>'
+            elif permite_reposicao == "Sim":
+                reposicao_html = '<span style="color:green;"><b>Sim</b></span>'
+            else:
+                reposicao_html = '<span style="color:gray;">—</span>'
+
             # ===== MONTA MENSAGEM =====
             msg = MIMEMultipart("alternative")
-            msg["From"] = Config.EMAIL_REMETENTE
-            msg["To"] = ", ".join(destinatarios)
+            msg["From"]    = Config.EMAIL_REMETENTE
+            msg["To"]      = ", ".join(destinatarios)
             msg["Subject"] = f"🚨 Novo Pedido - Sinistro {dados.get('numero_sinistro', '')}"
 
             corpo_html = f"""
@@ -29,16 +39,27 @@ class NotificadorEmail:
                 <body style="font-family: Arial, sans-serif;">
                     <h2 style="color:#d9534f;">🚨 Novo Pedido Recebido</h2>
 
+                    <p><b>Atendente:</b> {dados.get('nome_usuario', '')}</p>
+
+                    <hr style="border: none; border-top: 1px solid #eee;">
+
                     <p><b>Número Sinistro:</b> {dados.get('numero_sinistro', '')}</p>
                     <p><b>Número Pedido:</b> {dados.get('numero_pedido', '')}</p>
                     <p><b>Data Solicitação:</b> {dados.get('data_solicitacao', '')}</p>
                     <p><b>Data Pedido:</b> {dados.get('data_pedido', '')}</p>
+
+                    <hr style="border: none; border-top: 1px solid #eee;">
+
                     <p><b>Marca:</b> {dados.get('marca', '')}</p>
                     <p><b>Veículo:</b> {dados.get('veiculo', '')}</p>
                     <p><b>Modelo:</b> {dados.get('modelo', '')}</p>
                     <p><b>Placa:</b> {dados.get('placa', '')}</p>
                     <p><b>Chassi:</b> {dados.get('chassi', '')}</p>
                     <p><b>Ano:</b> {dados.get('ano', '')}</p>
+
+                    <hr style="border: none; border-top: 1px solid #eee;">
+
+                    <p><b>Permite Reposição:</b> {reposicao_html}</p>
 
                     <p><b>Criticidade:</b>
                        <span style="color:red;">
@@ -47,7 +68,6 @@ class NotificadorEmail:
                     </p>
 
                     <hr>
-
                     <p style="font-size:12px;color:gray;">
                         Mensagem automática enviada pelo RPA Porto Seguro
                     </p>
@@ -58,23 +78,20 @@ class NotificadorEmail:
 
             msg.attach(MIMEText(corpo_html, "html", "utf-8"))
 
-            # ===== ENVIO SMTP (porta 25 - servidor corporativo sem autenticação) =====
-            with smtplib.SMTP(
-                Config.SMTP_SERVIDOR,
-                Config.SMTP_PORTA,
-                timeout=30
-            ) as servidor:
+            # ===== ENVIO VIA AWS SES SMTP (STARTTLS porta 587) =====
+            with smtplib.SMTP(Config.SMTP_SERVIDOR, Config.SMTP_PORTA, timeout=30) as servidor:
 
-                servidor.ehlo()  # Apresenta o cliente ao servidor
-
-                # Servidor corporativo de relay — sem autenticação
+                servidor.ehlo()
+                servidor.starttls()
+                servidor.ehlo()
+                servidor.login(Config.SMTP_USER, Config.SMTP_PASS)
                 servidor.sendmail(
                     Config.EMAIL_REMETENTE,
                     destinatarios,
                     msg.as_string()
                 )
 
-                print(f"✅ Email enviado com sucesso para: {', '.join(destinatarios)}")
+            print(f"✅ Email enviado com sucesso para: {', '.join(destinatarios)}")
 
         except smtplib.SMTPException as e:
             print(f"❌ Erro SMTP ao enviar email: {str(e)}")
