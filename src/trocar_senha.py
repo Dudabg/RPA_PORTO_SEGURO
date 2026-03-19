@@ -6,7 +6,7 @@ def trocar_senha():
 
     print("🔑 TROCA DE SENHA - RPA CREDENTIALS\n")
 
-    # ── Solicita os dados ───────────────────────────────────────
+    # ── Solicita os dados 
     cpf        = input("Digite o CPF (USERNAME): ").strip()
     nova_senha = input("Digite a nova senha:     ").strip()
 
@@ -14,7 +14,7 @@ def trocar_senha():
         print("❌ CPF e senha são obrigatórios.")
         return
 
-    # ── Conecta no banco ────────────────────────────────────────
+    # ── Conecta no banco ─
     conexao = criar_conexao()
     cursor  = conexao.cursor()
 

@@ -11,17 +11,16 @@ import json
 
 class PortoAutomacao:
 
-    def __init__(self, driver, conexao, id_execucao, nome_robo="RPA_PORTO", logger=None):
+    def __init__(self, driver, conexao, id_execucao, nome_robo="RPA_PORTO_001", logger=None):
         self.driver = driver
         self.wait = WebDriverWait(self.driver, 60)
         self.conexao = conexao
         self.id_execucao = id_execucao
         self.nome_robo = nome_robo
         self.nome_usuario = None
-        self.logger = logger  
+        self.logger = logger
 
     def _log(self, mensagem: str):
-        """Usa o logger se disponível, senão usa print normal."""
         if self.logger:
             self.logger.log(mensagem)
         else:
@@ -64,6 +63,56 @@ class PortoAutomacao:
 
         self._log("Login enviado, aguardando carregamento...")
 
+        # ✅ Aguarda: dashboard OU mensagem de erro de login
+        try:
+            WebDriverWait(self.driver, 15).until(
+                lambda driver:
+                    driver.find_elements(
+                        By.XPATH,
+                        "//li[contains(text(),'LOGIN E/OU SENHA INVÁLIDOS')]"
+                    )
+                    or driver.find_elements(
+                        By.XPATH,
+                        "//span[contains(text(),'ATENDER PEDIDO')]"
+                    )
+            )
+        except TimeoutException:
+            raise Exception(f"Timeout aguardando resposta do login para CPF {usuario}")
+
+        # ✅ Verifica se apareceu erro de login inválido
+        if self.driver.find_elements(
+            By.XPATH,
+            "//li[contains(text(),'LOGIN E/OU SENHA INVÁLIDOS')]"
+        ):
+            self._log(f"⚠️ Login inválido para CPF {usuario}. Verifique a senha no banco.")
+
+            # ✅ Grava como erro técnico (robô não conseguiu executar)
+            registrar_erro_tecnico(
+                conexao     = self.conexao,
+                id_execucao = self.id_execucao,
+                nome_robo   = self.nome_robo,
+                tipo        = "LOGIN_INVALIDO",
+                mensagem    = f"CPF {usuario}: LOGIN E/OU SENHA INVÁLIDOS no portal.",
+            )
+
+            # Envia e-mail de alerta
+            try:
+                NotificadorEmail.enviar_alerta_login_invalido(usuario)
+            except Exception as e_email:
+                self._log(f"Erro ao enviar alerta de login inválido: {e_email}")
+
+                # ✅ Falha no e-mail de alerta = erro de negócio com id_order NULL
+                registrar_erro_negocio(
+                    conexao       = self.conexao,
+                    id_order      = None,
+                    regra_negocio = "ERRO_EMAIL_ALERTA_LOGIN",
+                    mensagem      = f"Falha ao enviar alerta de login inválido para CPF {usuario}: {str(e_email)[:500]}",
+                    nome_robo     = self.nome_robo,
+                )
+
+            raise Exception(f"LOGIN_INVALIDO: CPF {usuario}")
+
+        # ✅ Login OK — aguarda dashboard carregar
         self.wait.until(
             EC.presence_of_element_located(
                 (By.XPATH, "//span[contains(text(),'ATENDER PEDIDO')]")
@@ -224,6 +273,8 @@ class PortoAutomacao:
                     numero_pedido = numero,
                     raw_payload   = json.dumps(dados, ensure_ascii=False),
                     nome_robo     = self.nome_robo,
+                    customer_name = "PORTO SEGURO",
+                    order_date    = dados["data_pedido"],
                 )
 
                 self._log(f"Pedido inserido no banco. ID_ORDER={id_order}")
@@ -261,13 +312,13 @@ class PortoAutomacao:
                 except Exception as e_email:
                     self._log(f"Erro ao enviar email: {e_email}")
 
-                    registrar_erro_tecnico(
-                        conexao     = self.conexao,
-                        id_execucao = self.id_execucao,
-                        nome_robo   = self.nome_robo,
-                        tipo        = "ERRO_EMAIL",
-                        mensagem    = str(e_email),
-                        excecao     = e_email,
+                    # ✅ Falha no e-mail = erro de negócio (pedido capturado mas não comunicado)
+                    registrar_erro_negocio(
+                        conexao       = self.conexao,
+                        id_order      = id_order,
+                        regra_negocio = "ERRO_ENVIO_EMAIL",
+                        mensagem      = f"Falha ao enviar e-mail para Key Account: {str(e_email)[:500]}",
+                        nome_robo     = self.nome_robo,
                     )
 
                     atualizar_status_ordem(

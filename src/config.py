@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-# ✅ Acha o .env na raiz independente de onde o script é rodado
+# Acha o .env na raiz independente de onde o script é rodado
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.env'))
 
 
@@ -31,8 +31,8 @@ class Config:
     EMAIL_CANAL_TEAMS = os.getenv("EMAIL_CANAL_TEAMS")
     SMTP_SERVIDOR = os.getenv("SMTP_SERVIDOR")
     SMTP_PORTA    = int(os.getenv("SMTP_PORTA"))
-    SMTP_USER     = os.getenv("SMTP_USER")   # ✅ novo
-    SMTP_PASS     = os.getenv("SMTP_PASS")   # ✅ novo
+    SMTP_USER     = os.getenv("SMTP_USER")   
+    SMTP_PASS     = os.getenv("SMTP_PASS")   
 
     # -------------------------
     # DIRETÓRIOS
