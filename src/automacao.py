@@ -13,7 +13,7 @@ class PortoAutomacao:
 
     def __init__(self, driver, conexao, id_execucao, nome_robo="RPA_PORTO_001", logger=None):
         self.driver = driver
-        self.wait = WebDriverWait(self.driver, 60)
+        self.wait = WebDriverWait(self.driver, 120)
         self.conexao = conexao
         self.id_execucao = id_execucao
         self.nome_robo = nome_robo
@@ -34,7 +34,7 @@ class PortoAutomacao:
 
         self._log("Acessando o portal...")
         self.driver.get(Config.PORTO_URL)
-        time.sleep(5)
+        time.sleep(10)
 
     # -------------------------------------------------
     # 2️⃣ LOGIN
@@ -65,7 +65,7 @@ class PortoAutomacao:
 
         # ✅ Aguarda: dashboard OU mensagem de erro de login
         try:
-            WebDriverWait(self.driver, 15).until(
+            WebDriverWait(self.driver, 60).until(
                 lambda driver:
                     driver.find_elements(
                         By.XPATH,

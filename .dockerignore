@@ -1,0 +1,21 @@
+# Ignora o ambiente virtual — o container cria o próprio
+venv/
+.venv/
+
+# Ignora arquivos desnecessários
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Ignora logs locais
+logs/
+
+# Ignora arquivos de desenvolvimento
+.git/
+.gitignore
+*.md
+
+# Ignora o driver local — o webdriver-manager baixa automaticamente
+driver/

@@ -1,0 +1,18 @@
+services:
+
+  rpa_porto_001:
+    build: .
+    container_name: rpa_porto_001
+    restart: always        # reinicia automaticamente se cair
+
+    env_file:
+      - .env               # lê todas as variáveis do .env
+
+    environment:
+      - TZ=America/Sao_Paulo  # fuso horário de Brasília
+
+    volumes:
+      - ./logs:/app/logs   # logs persistem fora do container
+
+    # Necessário para o Chrome rodar em modo headless no Docker
+    shm_size: '2gb'        # memória compartilhada para o Chrome

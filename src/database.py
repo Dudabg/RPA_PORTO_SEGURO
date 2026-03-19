@@ -1,7 +1,15 @@
 import oracledb
+import os
 from crypto import descriptografar
 
-oracledb.init_oracle_client(lib_dir=r"C:\Oracle\19c\bin")
+rodando_no_docker = os.path.exists("/.dockerenv")
+
+if rodando_no_docker:
+    oracledb.init_oracle_client(lib_dir="/opt/oracle/instantclient_19_19")
+else:
+    oracledb.init_oracle_client(lib_dir=r"C:\Oracle\19c\bin")
+
+oracledb.defaults.fetch_lobs = False
 
 _CONFIG = {
     "user":     "rmp",
@@ -21,7 +29,6 @@ def criar_conexao():
 
 
 def garantir_conexao(conexao):
-    """Verifica se conexão ainda está viva. Reconecta se necessário."""
     try:
         conexao.ping()
         return conexao
@@ -31,10 +38,6 @@ def garantir_conexao(conexao):
 
 
 def buscar_credenciais(conexao, bot_name):
-    """
-    Busca credenciais ativas do banco e descriptografa as senhas.
-    Retorna lista de dicts: [{"username": "cpf", "password": "senha"}, ...]
-    """
     cursor = conexao.cursor()
     try:
         cursor.execute("""
@@ -50,7 +53,7 @@ def buscar_credenciais(conexao, bot_name):
 
         for row in cursor.fetchall():
             cred = dict(zip(colunas, row))
-            cred["password"] = descriptografar(cred["password"])  # ✅ descriptografa antes de usar
+            cred["password"] = descriptografar(cred["password"])
             credenciais.append(cred)
 
         return credenciais
